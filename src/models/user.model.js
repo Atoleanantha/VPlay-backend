@@ -50,10 +50,10 @@ const userSchema=new Schema(
 },{timestamps:true});
 
 // just called before saving data
-userSchema.pre("save",async function (next){
-    if(!this.password.isModified("password")) return next();
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
 
-    this.password= await bcrypt.hash(this.password,10);
+    this.password = await bcrypt.hash(this.password, 10);
     next();
 });
 
