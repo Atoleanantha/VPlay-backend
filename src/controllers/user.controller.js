@@ -148,8 +148,8 @@ const logoutUser=asyncHandler(async(req,res)=>{
     await User.findByIdAndUpdate(
         userId,
         {
-            $set:{
-                refreshToken:undefined
+            $unset:{
+                refreshToken:1
             }
         },
         {
@@ -174,15 +174,18 @@ const logoutUser=asyncHandler(async(req,res)=>{
 
 const refreshAccessToken=asyncHandler(async(req,res)=>{
 
-    const incommingRefreshToken=req.cookies?.refreshAccessToken || req.body.refreshToken
+    const incommingRefreshToken=req.cookies?.refreshToken || req.body.refreshToken
 
     if(!incommingRefreshToken){
-        throw new ApiError(401,"Unauthorized request")
+        throw new ApiError(401," Unauthorized request")
     }
-
+    
     try{
         const decodedToken=await jwt.verify(incommingRefreshToken,process.env.REFRESH_TOCKEN_SECRET);
+        // const decodedToken = await jwt.verify(incommingRefreshToken, process.env.ACCESS_TOCKEN_SECRET);
+        
         const user=await User.findById(decodedToken?._id);
+        console.log("decode",decodedToken);
         if(!user){
             throw new ApiError(401,"Invalid refresh token")
         }
@@ -221,6 +224,7 @@ const changeCurrentPassword=asyncHandler(async(req,res)=>{
     const userId=req.user?._id;
 
     const user=await User.findById(userId);
+    // console.log(user);
     const isPasswordCorrect=await user.isPasswordCorrect(oldPassword);
     if(!isPasswordCorrect){
         throw new ApiError(400,"Old Password not matched.");
